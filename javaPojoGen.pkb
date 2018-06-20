@@ -9,7 +9,7 @@ AS
       RETURN CLOB
    AS
       l_count        PLS_INTEGER := 0;
-      l_table_name   dbo_name_t := LOWER (p_table_name);
+      l_table_name   dbo_name_t := UPPER (p_table_name);
       l_vars         teplsql.t_assoc_array;
       l_pojo_code    CLOB;
    BEGIN
@@ -65,8 +65,9 @@ AS
    IS
       l_tt   column_tt;
    BEGIN
-        SELECT   to_camel_case(c.table_name)
+        SELECT   c.table_name
                , to_camel_case (c.column_name)
+               , upper(c.column_name)
                , c.nullable
                , '' constraint_type
                , to_java_type(c.data_type)
@@ -89,6 +90,7 @@ AS
             
             SELECT   c.table_name
                    , to_camel_case (c.column_name)
+                   , upper(c.column_name)
                    , 'N'
                    , 'P' constraint_type
                    , to_java_type(c.data_type)
@@ -102,6 +104,7 @@ AS
       ELSE
            SELECT   c.table_name
                   , to_camel_case (c.column_name)
+                  , upper(c.column_name)
                   , c.nullable
                   , cs.constraint_type
                   , to_java_type(c.data_type)
@@ -120,6 +123,64 @@ AS
 
       RETURN l_tt;
    END;
+
+
+   FUNCTION get_non_pk_columns (p_tab_name VARCHAR2)
+      RETURN column_tt
+   IS
+      l_tt   column_tt;
+   BEGIN
+      IF g_unque_key IS NOT NULL
+      THEN
+            
+            SELECT   c.table_name
+                   , to_camel_case (c.column_name)
+                   , upper(c.column_name)
+                   , 'N'
+                   , 'P' constraint_type
+                   , to_java_type(c.data_type)
+              BULK   COLLECT
+              INTO   l_tt
+              FROM   user_tab_columns c
+             WHERE   c.table_name = UPPER (p_tab_name)
+               AND   c.column_name <> UPPER(g_unque_key)
+          ORDER BY   c.column_id;         
+         
+      ELSE
+         WITH pks
+             AS (SELECT c.column_name
+                   FROM user_tab_columns c
+                        left join user_cons_columns cc
+                               ON c.table_name = cc.table_name
+                                  AND c.column_name = cc.column_name
+                        left join user_constraints cs
+                               ON cc.constraint_name = cs.constraint_name
+                  WHERE c.table_name = UPPER (p_tab_name)
+                    AND cs.constraint_type = 'P'
+                  ORDER BY c.column_id)
+        SELECT  c.table_name
+              , to_camel_case ( c.column_name )
+              , upper(c.column_name)
+              , c.nullable
+              , cs.constraint_type
+              , to_java_type ( c.data_type )
+          BULK   COLLECT
+          INTO   l_tt               
+          FROM user_tab_columns c
+               left join user_cons_columns cc
+                      ON c.table_name = cc.table_name
+                         AND c.column_name = cc.column_name
+               left join user_constraints cs
+                      ON cc.constraint_name = cs.constraint_name
+         WHERE c.table_name = UPPER (p_tab_name)
+           AND c.column_name NOT IN (SELECT pks.column_name
+                                       FROM pks)
+         ORDER BY c.column_id; 
+                  
+      END IF;
+
+      RETURN l_tt;
+   END;      
 
 
    FUNCTION to_camel_case (p_stirng VARCHAR2)
@@ -169,7 +230,7 @@ AS
                 WHEN data_type = 'FLOAT'            THEN 'double'
                 WHEN data_type = 'REAL'             THEN 'float'
                 WHEN data_type = 'DATE'             THEN 'Timestamp'
-                WHEN data_type LIKE 'TIMESTAMP%' THEN 'java.sql.Timestamp'
+                WHEN data_type LIKE 'TIMESTAMP%' THEN 'Timestamp'
                 WHEN data_type LIKE 'INTERVAL%' THEN 'String'
                 WHEN data_type = 'ROWID'            THEN 'java.sql.RowId'
                 WHEN data_type = 'UROWID'           THEN 'java.sql.RowId'

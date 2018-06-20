@@ -18,6 +18,7 @@ AS
       RECORD (
          table_name        user_tab_columns.table_name%TYPE
        , column_name       user_tab_columns.column_name%TYPE
+       , db_column_name    user_tab_columns.column_name%TYPE
        , nullable          user_tab_columns.nullable%TYPE
        , constraint_type   user_constraints.constraint_type%TYPE
        , data_type         user_tab_columns.data_type%TYPE
@@ -46,6 +47,9 @@ AS
    FUNCTION get_pk_columns (p_tab_name VARCHAR2)
       RETURN column_tt;
 
+   FUNCTION get_non_pk_columns (p_tab_name VARCHAR2)
+      RETURN column_tt;
+
    FUNCTION to_camel_case (p_stirng VARCHAR2)
       RETURN VARCHAR2;
 
@@ -56,10 +60,104 @@ AS
         RETURN VARCHAR2;
         
 
---Spec Template
+/************************
+*  POJO Template        *
+*************************/
+
 $if false $then
 <%@ template
     name=pojo-template
+%>
+<%! col      javaPojoGen.column_tt := javaPojoGen.get_all_columns ('${table_name}'); %>
+<%! pk       javaPojoGen.column_tt := javaPojoGen.get_pk_columns ('${table_name}'); %>
+<%! c pls_integer; %>
+<%! /* Separator procedure */
+    procedure sep (p_cont in pls_integer, p_delimiter in varchar2)
+    as
+    begin
+         if p_cont > 1
+         then
+               teplsql.p(p_delimiter);
+         end if;
+    end; %>
+<%! function uf (p_in in varchar2) return varchar2
+    as
+    begin
+        return javaPojoGen.upper_first(p_in);
+    end;%>
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+
+public class ${className} {
+
+    /**
+    * class ${className}
+    * Generated with: javaPojoGen
+    * Website: github.com/osalvador/javaPojoGenerator
+    * Created On: ${date}
+    */
+
+    // Attributes
+    <% c := col.last+1;
+    for i in 1 .. col.last loop %>
+    private <%= col(i).data_type%> <%= col(i).COLUMN_NAME%>;
+    <% end loop; %>
+
+    // Empty Constructor
+    public ${className}(){}
+        
+    // Getters and Setters
+    <% c := col.last+1;
+    for i in 1 .. col.last loop %>
+    public <%= col(i).data_type%> get<%= uf(col(i).COLUMN_NAME) %>(){
+        return <%= col(i).COLUMN_NAME%>;
+    }    
+    public void set<%= uf(col(i).COLUMN_NAME) %>(<%= col(i).data_type%> <%= col(i).COLUMN_NAME%>) {
+        this.<%= col(i).COLUMN_NAME%> = <%= col(i).COLUMN_NAME%>;
+    }
+    
+    <% end loop; %>     
+    
+    @Override
+    public String toString() {
+        return "${className}{" +
+                <% c := col.last+1; for i in 1 .. col.last loop %>
+                "<%= col(i).COLUMN_NAME%>=" + <%= col(i).COLUMN_NAME%> + "<%sep(c-i,',');%>"+ 
+                <% end loop; %>
+                '}';
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ${className} that = (${className}) o;
+        <% c := pk.last+1; for i in 1 .. pk.last loop %>
+        if (!get<%=uf(pk(i).COLUMN_NAME) %>().equals(that.get<%=uf(pk(i).COLUMN_NAME) %>())) return false;
+        <% end loop; %>
+        return true;        
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 1;
+        <% c := pk.last+1; for i in 1 .. pk.last loop %>
+        result = 31 * result + get<%=uf(pk(i).COLUMN_NAME) %>().hashCode();
+        <% end loop; %>
+        return result;
+    }
+    
+}
+$end
+
+
+/************************
+*  JavaBean Template    *
+*************************/ 
+$if false $then
+<%@ template
+    name=bean-template
 %>
 <%! col      javaPojoGen.column_tt := javaPojoGen.get_all_columns ('${table_name}'); %>
 <%! pk       javaPojoGen.column_tt := javaPojoGen.get_pk_columns ('${table_name}'); %>
@@ -86,7 +184,7 @@ public class ${className} implements Serializable {
 
     /**
     * class ${className}
-    * Generated with: javaPojoGen - DO NOT MODIFY!
+    * Generated with: javaPojoGen
     * Website: github.com/osalvador/javaPojoGenerator
     * Created On: ${date}
     */
@@ -134,7 +232,126 @@ public class ${className} implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ComIntAplDest that = (ComIntAplDest) o;
+        ${className} that = (${className}) o;
+        <% c := pk.last+1; for i in 1 .. pk.last loop %>
+        if (!get<%=uf(pk(i).COLUMN_NAME) %>().equals(that.get<%=uf(pk(i).COLUMN_NAME) %>())) return false;
+        <% end loop; %>
+        return true;        
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 1;
+        <% c := pk.last+1; for i in 1 .. pk.last loop %>
+        result = 31 * result + get<%=uf(pk(i).COLUMN_NAME) %>().hashCode();
+        <% end loop; %>
+        return result;
+    }
+    
+}
+$end
+
+
+
+
+
+
+/************************
+*  JavaBean Template    *
+*************************/ 
+$if false $then
+<%@ template
+    name=jpa-entity-template
+%>
+<%! col  javaPojoGen.column_tt := javaPojoGen.get_all_columns ('${table_name}'); %>
+<%! pk   javaPojoGen.column_tt := javaPojoGen.get_pk_columns ('${table_name}'); %>
+<%! npk  javaPojoGen.column_tt := javaPojoGen.get_non_pk_columns ('${table_name}'); %>
+<%! c pls_integer; %>
+<%! /* Separator procedure */
+    procedure sep (p_cont in pls_integer, p_delimiter in varchar2)
+    as
+    begin
+         if p_cont > 1
+         then
+               teplsql.p(p_delimiter);
+         end if;
+    end; %>
+<%! function uf (p_in in varchar2) return varchar2
+    as
+    begin
+        return javaPojoGen.upper_first(p_in);
+    end;%>
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+
+@Entity
+@Table(name="${table_name}")
+public class ${className}Entity implements Serializable {
+
+    /**
+    * class ${className}Entity
+    * Generated with: javaPojoGen
+    * Website: github.com/osalvador/javaPojoGenerator
+    * Created On: ${date}
+    */
+
+    // Attributes    
+    <% c := pk.last+1;
+    for i in 1 .. pk.last loop %>
+    @Id
+    @Column(name="<%= pk(i).db_column_name%>")
+    private <%= pk(i).data_type%> <%= pk(i).COLUMN_NAME%>;
+    <% end loop; %>
+    
+    <% c := npk.last+1;
+    for i in 1 .. npk.last loop %>
+    @Column(name="<%= npk(i).db_column_name%>")
+    private <%= npk(i).data_type%> <%= npk(i).COLUMN_NAME%>;
+    <% end loop; %>
+
+    // Constructors
+    private ${className}Entity(){}
+    
+    public ${className}Entity(<% c := pk.last+1; for i in 1 .. pk.last loop %>
+<%=  pk(i).data_type%> <%=pk(i).COLUMN_NAME %><%sep(c-i,',');%><% end loop; %>) {
+<% c := pk.last+1; for i in 1 .. pk.last loop %>
+        this.<%=pk(i).COLUMN_NAME %> = <%=pk(i).COLUMN_NAME %>;
+<% end loop; %>        
+    }
+    
+    
+    // Getters and Setters
+    <% c := col.last+1;
+    for i in 1 .. col.last loop %>
+    public <%= col(i).data_type%> get<%= uf(col(i).COLUMN_NAME) %>(){
+        return <%= col(i).COLUMN_NAME%>;
+    }    
+    public void set<%= uf(col(i).COLUMN_NAME) %>(<%= col(i).data_type%> <%= col(i).COLUMN_NAME%>) {
+        this.<%= col(i).COLUMN_NAME%> = <%= col(i).COLUMN_NAME%>;
+    }
+    
+    <% end loop; %>     
+    
+    @Override
+    public String toString() {
+        return "${className}Entity{" +
+                <% c := col.last+1; for i in 1 .. col.last loop %>
+                "<%= col(i).COLUMN_NAME%>=" + <%= col(i).COLUMN_NAME%> + "<%sep(c-i,',');%>"+ 
+                <% end loop; %>
+                '}';
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ${className}Entity that = (${className}Entity) o;
         <% c := pk.last+1; for i in 1 .. pk.last loop %>
         if (!get<%=uf(pk(i).COLUMN_NAME) %>().equals(that.get<%=uf(pk(i).COLUMN_NAME) %>())) return false;
         <% end loop; %>
