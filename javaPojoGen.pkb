@@ -232,10 +232,10 @@ AS
                 WHEN data_type = 'DATE'             THEN 'Timestamp'
                 WHEN data_type LIKE 'TIMESTAMP%' THEN 'Timestamp'
                 WHEN data_type LIKE 'INTERVAL%' THEN 'String'
-                WHEN data_type = 'ROWID'            THEN 'java.sql.RowId'
-                WHEN data_type = 'UROWID'           THEN 'java.sql.RowId'
-                WHEN data_type = 'CLOB'             THEN 'java.sql.Clob'
-                WHEN data_type = 'BLOB'             THEN 'java.sql.Blob'
+                WHEN data_type = 'ROWID'            THEN 'RowId'
+                WHEN data_type = 'UROWID'           THEN 'RowId'
+                WHEN data_type = 'CLOB'             THEN 'Clob'
+                WHEN data_type = 'BLOB'             THEN 'Blob'
                 WHEN data_type = 'XMLTYPE'          THEN 'String'
                 ELSE 'Datatype not suported'
             END
@@ -259,6 +259,41 @@ AS
         
         RETURN l_string;
     END;
+    
+    
+    FUNCTION get_java_imports (p_columns in column_tt)
+        RETURN VARCHAR2
+    AS
+        l_imports VARCHAR2(32000);
+        
+        procedure appendImport (p_data_type in varchar2)
+        as
+        begin
+            IF nvl(instr(l_imports, p_data_type),0) = 0
+            THEN
+                l_imports := l_imports || CHR(10) || 'import ' || p_data_type || ';';
+            END IF;
+        end;
+        
+    BEGIN
+        FOR i in 1 .. p_columns.last
+        loop
+        
+            CASE p_columns(i).data_type        
+               WHEN 'BigDecimal' THEN appendImport('java.math.BigDecimal');
+               WHEN 'Timestamp' THEN appendImport('java.sql.Timestamp');
+               WHEN 'RowId' THEN appendImport('java.sql.RowId');
+               WHEN 'Clob' THEN appendImport('java.sql.Clob');
+               WHEN 'Blob' THEN appendImport('java.sql.Blob');
+               ELSE null;
+            END CASE;
+            
+        end loop;
+        
+        return l_imports;
+    END;
+    
+    
 
 END javaPojoGen;
 /
