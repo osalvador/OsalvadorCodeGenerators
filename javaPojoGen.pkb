@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE BODY javaPojoGen
+create or replace PACKAGE BODY javaPojoGen
 AS
    --Global private variables
    g_unque_key   dbo_name_t;
@@ -48,9 +48,10 @@ AS
       l_vars ('date') := TO_CHAR (SYSDATE, 'DD-MON-YYYY HH24:MI');
       l_vars ('table_name') := l_table_name;
       l_vars ('className') := upper_first(to_camel_case(l_table_name));
+      l_vars ('unque_key') :=  REPLACE(upper(p_unique_key), ' ', '');
       
       --Define unique key if table don't has primary key
-      g_unque_key := p_unique_key;
+      g_unque_key := upper(p_unique_key);
       
       --Process template
       l_pojo_code := teplsql.process (l_vars, p_template, 'JAVAPOJOGEN');
@@ -80,14 +81,17 @@ AS
       RETURN l_tt;
    END;
 
-   FUNCTION get_pk_columns (p_tab_name VARCHAR2)
+   FUNCTION get_pk_columns (p_tab_name VARCHAR2, p_unque_key VARCHAR2 DEFAULT NULL)
       RETURN column_tt
    IS
       l_tt   column_tt;
    BEGIN
-      IF g_unque_key IS NOT NULL
+      IF p_unque_key IS NOT NULL
       THEN
-            
+      
+            WITH uks AS (SELECT regexp_substr(p_unque_key, '[^,]+', 1, level) uk
+                        FROM dual CONNECT BY regexp_substr(p_unque_key, '[^,]+', 1, level) IS NOT NULL
+            )
             SELECT   c.table_name
                    , to_camel_case (c.column_name)
                    , upper(c.column_name)
@@ -98,7 +102,7 @@ AS
               INTO   l_tt
               FROM   user_tab_columns c
              WHERE   c.table_name = UPPER (p_tab_name)
-               AND   c.column_name = UPPER(g_unque_key)
+               AND   c.column_name in (select uk from uks)
           ORDER BY   c.column_id;         
          
       ELSE
@@ -118,21 +122,24 @@ AS
                        user_constraints cs
                     ON cc.constraint_name = cs.constraint_name
             WHERE   c.table_name = UPPER (p_tab_name) AND cs.constraint_type = 'P'
-         ORDER BY   c.column_id;
+         ORDER BY   c.column_id;          
       END IF;
 
       RETURN l_tt;
    END;
 
 
-   FUNCTION get_non_pk_columns (p_tab_name VARCHAR2)
+   FUNCTION get_non_pk_columns (p_tab_name VARCHAR2, p_unque_key VARCHAR2 DEFAULT NULL)
       RETURN column_tt
    IS
       l_tt   column_tt;
    BEGIN
-      IF g_unque_key IS NOT NULL
+      IF p_unque_key IS NOT NULL
       THEN
             
+            WITH uks AS (SELECT regexp_substr(p_unque_key, '[^,]+', 1, level) uk
+                        FROM dual CONNECT BY regexp_substr(p_unque_key, '[^,]+', 1, level) IS NOT NULL
+            )
             SELECT   c.table_name
                    , to_camel_case (c.column_name)
                    , upper(c.column_name)
@@ -143,8 +150,8 @@ AS
               INTO   l_tt
               FROM   user_tab_columns c
              WHERE   c.table_name = UPPER (p_tab_name)
-               AND   c.column_name <> UPPER(g_unque_key)
-          ORDER BY   c.column_id;         
+               AND   c.column_name not in (select uk from uks)
+          ORDER BY   c.column_id;          
          
       ELSE
          WITH pks
@@ -296,4 +303,3 @@ AS
     
 
 END javaPojoGen;
-/

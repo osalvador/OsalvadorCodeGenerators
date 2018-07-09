@@ -1,4 +1,4 @@
-CREATE OR REPLACE PACKAGE javaPojoGen authid current_user
+create or replace PACKAGE javaPojoGen authid current_user
 AS
 
    /**
@@ -44,10 +44,10 @@ AS
    FUNCTION get_all_columns (p_tab_name VARCHAR2)
       RETURN column_tt;
 
-   FUNCTION get_pk_columns (p_tab_name VARCHAR2)
+   FUNCTION get_pk_columns (p_tab_name VARCHAR2, p_unque_key VARCHAR2 DEFAULT NULL)
       RETURN column_tt;
 
-   FUNCTION get_non_pk_columns (p_tab_name VARCHAR2)
+   FUNCTION get_non_pk_columns (p_tab_name VARCHAR2, p_unque_key VARCHAR2 DEFAULT NULL)
       RETURN column_tt;
 
    FUNCTION to_camel_case (p_stirng VARCHAR2)
@@ -72,7 +72,7 @@ $if false $then
     name=pojo-template
 %>
 <%! col      javaPojoGen.column_tt := javaPojoGen.get_all_columns ('${table_name}'); %>
-<%! pk       javaPojoGen.column_tt := javaPojoGen.get_pk_columns ('${table_name}'); %>
+<%! pk       javaPojoGen.column_tt := javaPojoGen.get_pk_columns ('${table_name}', '${unque_key}'); %>
 <%! c pls_integer; %>
 <%! procedure sep (p_cont in pls_integer, p_delimiter in varchar2)
     as
@@ -159,7 +159,7 @@ $if false $then
     name=bean-template
 %>
 <%! col      javaPojoGen.column_tt := javaPojoGen.get_all_columns ('${table_name}'); %>
-<%! pk       javaPojoGen.column_tt := javaPojoGen.get_pk_columns ('${table_name}'); %>
+<%! pk       javaPojoGen.column_tt := javaPojoGen.get_pk_columns ('${table_name}', '${unque_key}'); %>
 <%! c pls_integer; %>
 <%! procedure sep (p_cont in pls_integer, p_delimiter in varchar2)
     as
@@ -256,8 +256,8 @@ $if false $then
     name=jpa-entity-template
 %>
 <%! col  javaPojoGen.column_tt := javaPojoGen.get_all_columns ('${table_name}'); %>
-<%! pk   javaPojoGen.column_tt := javaPojoGen.get_pk_columns ('${table_name}'); %>
-<%! npk  javaPojoGen.column_tt := javaPojoGen.get_non_pk_columns ('${table_name}'); %>
+<%! pk   javaPojoGen.column_tt := javaPojoGen.get_pk_columns ('${table_name}', '${unque_key}'); %>
+<%! npk  javaPojoGen.column_tt := javaPojoGen.get_non_pk_columns ('${table_name}', '${unque_key}'); %>
 <%! c pls_integer; %>
 <%! procedure sep (p_cont in pls_integer, p_delimiter in varchar2)
     as
@@ -297,7 +297,7 @@ public class ${className}Entity implements Serializable {
     private <%= pk(i).data_type%> <%= pk(i).COLUMN_NAME%>;
     <% end loop; %>
     
-    <% for i in 1 .. npk.last loop %>
+    <% for i in 1 .. nvl(npk.last,0) loop %>
     @Column(name="<%= npk(i).db_column_name%>")
     private <%= npk(i).data_type%> <%= npk(i).COLUMN_NAME%>;
     <% end loop; %>
@@ -365,7 +365,7 @@ $if false $then
 <%@ template
     name=jdbctemplate-dao-interface-template
 %>
-<%! pk   javaPojoGen.column_tt := javaPojoGen.get_pk_columns ('${table_name}'); %>
+<%! pk   javaPojoGen.column_tt := javaPojoGen.get_pk_columns ('${table_name}', '${unque_key}'); %>
 <%! c pls_integer; %>
 <%! procedure sep (p_cont in pls_integer, p_delimiter in varchar2)
     as
@@ -451,7 +451,7 @@ $if false $then
     name=jdbctemplate-dao-implement-template
 %>
 <%! col  javaPojoGen.column_tt := javaPojoGen.get_all_columns ('${table_name}'); %>
-<%! pk   javaPojoGen.column_tt := javaPojoGen.get_pk_columns ('${table_name}'); %>
+<%! pk   javaPojoGen.column_tt := javaPojoGen.get_pk_columns ('${table_name}', '${unque_key}'); %>
 <%! c pls_integer; %>
 <%! procedure sep (p_cont in pls_integer, p_delimiter in varchar2)
     as
@@ -605,4 +605,3 @@ $end
 
 
 END javaPojoGen;
-/
