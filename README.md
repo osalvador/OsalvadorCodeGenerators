@@ -2,7 +2,7 @@
 
 OsalvadorCodeGenerators is a web application for source code generation from database given the definition (DML) of table and automatically create Java Code (JPA Entity, JavaBean, View Model, JdbcTemplate DAO...) from these tables.
 
-The generator is defined in templates of [tePLSQL](https://github.com/osalvador/tePLSQL) (JSP and PSP like syntaxt (<%%>)) and the result is shown on the screen and can be downloaded. The web application has been developed with APEX at [apex.oracle.com](apex.oracle.com). Currently I have included the templates that I usually use in my work, but the templates are easily customizable.
+The generator is defined in templates of [tePLSQL](https://github.com/osalvador/tePLSQL) (JSP and PSP like syntax (<%%>)) and the result is shown on the screen and can be downloaded. The web application has been developed with APEX at [apex.oracle.com](apex.oracle.com). Currently I have included the templates that I usually use in my work, but the templates are easily customizable.
 
 
 ## Online Code Generator Web Application
@@ -11,25 +11,25 @@ The aplication on APEX: [Osalvador Live Code Generators](https://apex.oracle.com
 
 ## Demos
 
-#### Java POJO Generator
+#### [Java POJO Generator](https://apex.oracle.com/pls/apex/f?p=48301:4:113427991680588::NO:4::)
 
 The template: [pojo.teplsql](./templates/pojo.teplsql)
 
 ![](./images/javaPOJOGenerator.gif)
 
-#### Java Bean Generator
+#### [Java Bean Generator](https://apex.oracle.com/pls/apex/f?p=48301:5:113427991680588::NO:5::)
 
 The template: [bean.teplsql](./templates/bean.teplsql)
 
 ![](./images/javaBeanGenerator.gif)
 
-#### Java JPA Entity Generator
+#### [Java JPA Entity Generator](https://apex.oracle.com/pls/apex/f?p=48301:6:113427991680588::NO:6::)
 
 The template: [jpa-entity.teplsql](./templates/jpa-entity.teplsql)
 
 ![](./images/javaJPAEntityGenerator.gif)
 
-#### JdbcTemplate DAO Generator
+#### [JdbcTemplate DAO Generator](https://apex.oracle.com/pls/apex/f?p=48301:7:113427991680588::NO:7::)
 
 The Interface template: [jdbctemplate-dao-interface.teplsql](./templates/jdbctemplate/jdbctemplate-dao-interface.teplsql)
 
