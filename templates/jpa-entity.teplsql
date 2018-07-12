@@ -1,0 +1,103 @@
+<%@ template
+    name=jpa-entity-template
+%>
+<%! col  javaPojoGen.column_tt := javaPojoGen.get_all_columns ('${table_name}'); %>
+<%! pk   javaPojoGen.column_tt := javaPojoGen.get_pk_columns ('${table_name}', '${unque_key}'); %>
+<%! npk  javaPojoGen.column_tt := javaPojoGen.get_non_pk_columns ('${table_name}', '${unque_key}'); %>
+<%! c pls_integer; %>
+<%! procedure sep (p_cont in pls_integer, p_delimiter in varchar2)
+    as
+    begin
+         if p_cont > 1
+         then
+               teplsql.p(p_delimiter);
+         end if;
+    end; %>
+<%! function uf (p_in in varchar2) return varchar2
+    as
+    begin
+        return javaPojoGen.upper_first(p_in);
+    end;%>
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.io.Serializable;
+<%= javaPojoGen.get_java_imports(col) %>
+\\n
+@Entity
+@Table(name="${table_name}")
+public class ${className}Entity implements Serializable {
+
+    /**
+    * class ${className}Entity
+    * Generated with: javaPojoGen
+    * Website: github.com/osalvador/OsalvadorCodeGenerators
+    * Created On: ${date}
+    */
+
+    // Attributes    
+    <% for i in 1 .. pk.last loop %>
+    @Id
+    @Column(name="<%= pk(i).db_column_name%>")
+    private <%= pk(i).data_type%> <%= pk(i).COLUMN_NAME%>;
+    <% end loop; %>
+    
+    <% for i in 1 .. nvl(npk.last,0) loop %>
+    @Column(name="<%= npk(i).db_column_name%>")
+    private <%= npk(i).data_type%> <%= npk(i).COLUMN_NAME%>;
+    <% end loop; %>
+
+    // Constructors
+    private ${className}Entity(){}
+    
+    public ${className}Entity(<% c := pk.last+1; for i in 1 .. pk.last loop %>
+<%=  pk(i).data_type%> <%=pk(i).COLUMN_NAME %><%sep(c-i,',');%><% end loop; %>) {
+<% for i in 1 .. pk.last loop %>
+        this.<%=pk(i).COLUMN_NAME %> = <%=pk(i).COLUMN_NAME %>;
+<% end loop; %>
+    }
+    
+    
+    // Getters and Setters
+    <% for i in 1 .. col.last loop %>
+    public <%= col(i).data_type%> get<%= uf(col(i).COLUMN_NAME) %>(){
+        return <%= col(i).COLUMN_NAME%>;
+    }    
+    public void set<%= uf(col(i).COLUMN_NAME) %>(<%= col(i).data_type%> <%= col(i).COLUMN_NAME%>) {
+        this.<%= col(i).COLUMN_NAME%> = <%= col(i).COLUMN_NAME%>;
+    }
+    
+    <% end loop; %>     
+    
+    @Override
+    public String toString() {
+        return "${className}Entity{" +
+                <% c := col.last+1; for i in 1 .. col.last loop %>
+                "<%= col(i).COLUMN_NAME%>=" + <%= col(i).COLUMN_NAME%> + "<%sep(c-i,',');%>"+ 
+                <% end loop; %>
+                '}';
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ${className}Entity that = (${className}Entity) o;
+        <% for i in 1 .. pk.last loop %>
+        if (!get<%=uf(pk(i).COLUMN_NAME) %>().equals(that.get<%=uf(pk(i).COLUMN_NAME) %>())) return false;
+        <% end loop; %>
+        return true;        
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 1;
+        <% for i in 1 .. pk.last loop %>
+        result = 31 * result + get<%=uf(pk(i).COLUMN_NAME) %>().hashCode();
+        <% end loop; %>
+        return result;
+    }
+    
+}

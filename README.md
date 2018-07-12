@@ -4,11 +4,31 @@
 OsalvadorCodeGenerators se trata de una aplicación web para la generación de código fuente dada la definicion (DML) de una tabla de base de datos. El generador se define en plantillas de tePLSQL (estilo de JSP (<%%>) y PSP) y el resultado se muestra por pantalla. La aplicación web se ha desarrollado con APEX en apex.oracle.com. Actualmente se han incluido las plantillas que suelo usar en mi trabajo, pero como se puede observar, las plantillas son facilmente personalizables. 
 
 
-Demo: 
+### Demos
+
+#### Java POJO Generator
+
+The template: [pojo.teplsql](./pojo.teplsql)
 
 ![](./images/javaPOJOGenerator.gif)
+
+#### Java Bean Generator
+
+The template: [bean.teplsql](./bean.teplsql)
+
 ![](./images/javaBeanGenerator.gif)
+
+#### Java JPA Entity Generator
+
+The template: [jpa-entity.teplsql](./jpa-entity.teplsql)
+
 ![](./images/javaJPAEntityGenerator.gif)
+
+#### JdbcTemplate DAO Generator
+
+The Interface template: [jdbctemplate-dao-interface.teplsql](./jdbctemplate/jdbctemplate-dao-interface.teplsql)
+The Interface Implementation template: [jdbctemplate-dao-implement.teplsql](./jdbctemplate/jdbctemplate-dao-implement.teplsql)
+
 ![](./images/JDBCTemplateGenerator.gif)
 
 ## ¿Por qué otro generador de código?
