@@ -6,7 +6,10 @@ OsalvadorCodeGenerators se trata de una aplicación web para la generación de c
 
 Demo: 
 
-
+![](./images/javaPOJOGenerator.gif)
+![](./images/javaBeanGenerator.gif)
+![](./images/javaJPAEntityGenerator.gif)
+![](./images/JDBCTemplateGenerator.gif)
 
 ## ¿Por qué otro generador de código?
 
