@@ -1,6 +1,6 @@
 # OsalvadorCodeGenerators
 
-OsalvadorCodeGenerators is a web application for source code generation from database given the definition (DML) of table.
+OsalvadorCodeGenerators is a web application for source code generation from database given the definition (DML) of table and automatically create Java Code (JPA Entity, JavaBean, View Model, JdbcTemplate DAO...) from these tables.
 
 The generator is defined in templates of [tePLSQL](https://github.com/osalvador/tePLSQL) (JSP and PSP like syntaxt (<%%>)) and the result is shown on the screen and can be downloaded. The web application has been developed with APEX at [apex.oracle.com](apex.oracle.com). Currently I have included the templates that I usually use in my work, but the templates are easily customizable.
 
