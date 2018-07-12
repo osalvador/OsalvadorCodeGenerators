@@ -1,7 +1,8 @@
 # OsalvadorCodeGenerators
 
+OsalvadorCodeGenerators is a web application for source code generation from database given the definition (DML) of table.
 
-OsalvadorCodeGenerators se trata de una aplicación web para la generación de código fuente dada la definicion (DML) de una tabla de base de datos. El generador se define en plantillas de tePLSQL (estilo de JSP (<%%>) y PSP) y el resultado se muestra por pantalla. La aplicación web se ha desarrollado con APEX en apex.oracle.com. Actualmente se han incluido las plantillas que suelo usar en mi trabajo, pero como se puede observar, las plantillas son facilmente personalizables. 
+The generator is defined in templates of [tePLSQL](https://github.com/osalvador/tePLSQL) (style of JSP (<%%>) and PSP) and the result is shown on the screen. The web application has been developed with APEX at [apex.oracle.com](apex.oracle.com). Currently I have included the templates that I usually use in my work, but the templates are easily customizable.
 
 
 ### Demos
@@ -27,18 +28,18 @@ The template: [jpa-entity.teplsql](./templates/jpa-entity.teplsql)
 #### JdbcTemplate DAO Generator
 
 The Interface template: [jdbctemplate-dao-interface.teplsql](./templates/jdbctemplate/jdbctemplate-dao-interface.teplsql)
+
 The Interface Implementation template: [jdbctemplate-dao-implement.teplsql](./templates/jdbctemplate/jdbctemplate-dao-implement.teplsql)
 
 ![](./images/JDBCTemplateGenerator.gif)
 
-## ¿Por qué otro generador de código?
+## Why another code generator?
 
-Estamos acostumbrados a este tipo de generadores de código, que nos crean los modelos, entidades o DTOs basados en las tablas de nuestras bases de datos. El problema de estos generadores de código es requieren de una instrumentación (instalación y configuración) y un aprendizaje de uso que en ocasiones es mayor el tiempo que le dedicamos a esto que lo que podemos ahorrar generando el código. 
+I usually use this type of code generators to create models, entities or DTOs based on database tables. The problem with these code generators is that they require instrumentation (installation and configuration) and a learning curve that is sometimes greater than the time they saved. In addition these generators are used occasionally, having to re-read the documentation again.
 
-Con una aplicacion web nos ahorramos todos estos pasos previos y nos centramos en lo que realmente nos importa, obtener la parte aburrida de nuestro proyecto, generar estas clases. 
+With a web application we save all these previous steps and focus on what really matters to us, get the boring part of our project, generating these classes.
 
-Finalmente estoy trabajando en la generación de aplicaciones ejecutables, que el codigo fuente generado sea completamente ejecutable. 
-
+I am also working on the generation of complete applications based on SpringBoot.
 
 ## Roadmap
 
