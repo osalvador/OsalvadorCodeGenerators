@@ -8,26 +8,26 @@ OsalvadorCodeGenerators se trata de una aplicación web para la generación de c
 
 #### Java POJO Generator
 
-The template: [pojo.teplsql](./pojo.teplsql)
+The template: [pojo.teplsql](./templates/pojo.teplsql)
 
 ![](./images/javaPOJOGenerator.gif)
 
 #### Java Bean Generator
 
-The template: [bean.teplsql](./bean.teplsql)
+The template: [bean.teplsql](./templates/bean.teplsql)
 
 ![](./images/javaBeanGenerator.gif)
 
 #### Java JPA Entity Generator
 
-The template: [jpa-entity.teplsql](./jpa-entity.teplsql)
+The template: [jpa-entity.teplsql](./templates/jpa-entity.teplsql)
 
 ![](./images/javaJPAEntityGenerator.gif)
 
 #### JdbcTemplate DAO Generator
 
-The Interface template: [jdbctemplate-dao-interface.teplsql](./jdbctemplate/jdbctemplate-dao-interface.teplsql)
-The Interface Implementation template: [jdbctemplate-dao-implement.teplsql](./jdbctemplate/jdbctemplate-dao-implement.teplsql)
+The Interface template: [jdbctemplate-dao-interface.teplsql](./templates/jdbctemplate/jdbctemplate-dao-interface.teplsql)
+The Interface Implementation template: [jdbctemplate-dao-implement.teplsql](./templates/jdbctemplate/jdbctemplate-dao-implement.teplsql)
 
 ![](./images/JDBCTemplateGenerator.gif)
 
