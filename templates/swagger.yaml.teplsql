@@ -1,0 +1,172 @@
+<%@ template name=swagger %>
+<%! col  swaggerGen.column_tt := swaggerGen.get_all_columns ('${table_name}'); %>
+<%! pk   swaggerGen.column_tt := swaggerGen.get_pk_columns ('${table_name}', '${unque_key}'); %>
+<%! npk  swaggerGen.column_tt := swaggerGen.get_non_pk_columns ('${table_name}', '${unque_key}'); %>
+<%! c pls_integer; %>
+<%! procedure sep (p_cont in pls_integer, p_delimiter in varchar2)
+    as
+    begin
+         if p_cont > 1
+         then
+               teplsql.p(p_delimiter);
+         end if;
+    end; %>
+<%! function uf (p_in in varchar2) return varchar2
+    as
+    begin
+        return swaggerGen.upper_first(p_in);
+    end;%>
+swagger: '2.0'
+info:
+  title: REST API for ${table_name}
+  description: API for all CRUD operations of the table ${table_name}
+  version: 1.0.0
+host: '127.0.0.1:8080'
+basePath: /api/v1
+schemes:
+  - http
+produces:
+  - application/json
+tags:
+- name: "${className}"
+  description: "Table description"
+paths:
+  '/${className}':
+    get:
+      tags: 
+        - ${className}
+      summary: "Get all rows"
+      produces:
+        - application/json
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+              $ref: "#/definitions/${className}List"
+        404:
+          description: "the ${className} table is empty"
+    post:
+      tags: 
+        - ${className}
+      summary: "Add a new row"
+      produces: 
+        - application/json
+      parameters:
+        - name: payload
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/${className}Object'
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/${className}Object"
+  '/${className}/{<%= pk(1).column_name %>}':
+    get:
+      tags: 
+        - ${className}
+      summary: "Get a single row"
+      produces:
+        - application/json
+      parameters:
+        - name: <%= pk(1).column_name %>\\n
+          in: path
+          required: true
+          type: <%= pk(1).data_type %>\\n
+          description: implicit
+          pattern: '^[^/]+$'
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/${className}Object"
+    put:
+      tags: 
+        - ${className}    
+      summary: "Updates all fields in a row"
+      produces:
+        - application/json
+      parameters:
+        - name: <%= pk(1).column_name %>\\n
+          in: path
+          required: true
+          type: <%= pk(1).data_type %>\\n
+          description: implicit
+          pattern: '^[^/]+$'
+        - name: payload
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/${className}Object'
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/${className}Object"
+    patch:
+      tags: 
+        - ${className}
+      summary: "Partial update of a row"
+      operationId: updateItem
+      parameters:
+        - name: <%= pk(1).column_name %>\\n
+          in: path
+          required: true
+          type: <%= pk(1).data_type %>\\n
+          description: implicit
+          pattern: '^[^/]+$'
+        - name: payload
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/${className}Object'
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/${className}Object"
+    delete:
+      tags: 
+        - ${className}
+      summary: "Delete an existin row"        
+      produces:
+        - application/json
+      parameters:
+        - name: <%= pk(1).column_name %>\\n
+          in: path
+          required: true
+          type: <%= pk(1).data_type %>\\n
+          description: implicit
+          pattern: '^[^/]+$'
+      responses:
+        200:
+          description: "successful operation"
+definitions:
+  ${className}:
+    properties:
+      <% for i in 1 .. col.last loop %>
+      <%= col(i).COLUMN_NAME%>:
+        type: "<%= col(i).data_type%>"
+        <%if col(i).data_format is not null then %>        format: "<%= col(i).data_format%>" <% end if; %>\\n
+      <% end loop; %>
+  ${className}List:
+    properties: 
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/${className}'
+  ${className}Object:
+    properties: 
+      data:
+          $ref: '#/definitions/${className}'
+externalDocs:
+  description: "Swagger doc generated with Osalvador Code Generator"
+  url: "https://apex.oracle.com/pls/apex/f?p=48301:1:33118650103837:::::"
+
+# TODD 
+# pagination
+# sorting
+# filtering
+# links
+# fields?
