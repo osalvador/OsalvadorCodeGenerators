@@ -17,19 +17,24 @@
         return swaggerGen.upper_first(p_in);
     end;%>
 swagger: '2.0'
+
 info:
   title: REST API for ${table_name}
   description: API for all CRUD operations of the table ${table_name}
   version: 1.0.0
+
 host: '127.0.0.1:8080'
 basePath: /api/v1
 schemes:
   - http
+
 produces:
   - application/json
+
 tags:
-- name: "${className}"
-  description: "Table description"
+  - name: "${className}"
+    description: "Table description"
+
 paths:
   '/${className}':
     get:
@@ -38,6 +43,10 @@ paths:
       summary: "Get all rows"
       produces:
         - application/json
+      parameters:
+        - $ref: "#/parameters/offsetParam"
+        - $ref: "#/parameters/limitParam"
+        - $ref: "#/parameters/sort"
       responses:
         200:
           description: "successful operation"
@@ -52,16 +61,13 @@ paths:
       produces: 
         - application/json
       parameters:
-        - name: payload
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/${className}Object'
+        - $ref: "#/parameters/payloadParam"
       responses:
         200:
           description: "successful operation"
           schema:
             $ref: "#/definitions/${className}Object"
+
   '/${className}/{<%= pk(1).column_name %>}':
     get:
       tags: 
@@ -70,12 +76,7 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: <%= pk(1).column_name %>\\n
-          in: path
-          required: true
-          type: <%= pk(1).data_type %>\\n
-          description: implicit
-          pattern: '^[^/]+$'
+        - $ref: "#/parameters/idParam"
       responses:
         200:
           description: "successful operation"
@@ -88,17 +89,8 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: <%= pk(1).column_name %>\\n
-          in: path
-          required: true
-          type: <%= pk(1).data_type %>\\n
-          description: implicit
-          pattern: '^[^/]+$'
-        - name: payload
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/${className}Object'
+        - $ref: "#/parameters/idParam"
+        - $ref: "#/parameters/payloadParam"
       responses:
         200:
           description: "successful operation"
@@ -110,17 +102,8 @@ paths:
       summary: "Partial update of a row"
       operationId: updateItem
       parameters:
-        - name: <%= pk(1).column_name %>\\n
-          in: path
-          required: true
-          type: <%= pk(1).data_type %>\\n
-          description: implicit
-          pattern: '^[^/]+$'
-        - name: payload
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/${className}Object'
+        - $ref: "#/parameters/idParam"
+        - $ref: "#/parameters/payloadParam"
       responses:
         200:
           description: "successful operation"
@@ -133,40 +116,93 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: <%= pk(1).column_name %>\\n
-          in: path
-          required: true
-          type: <%= pk(1).data_type %>\\n
-          description: implicit
-          pattern: '^[^/]+$'
+        - $ref: "#/parameters/idParam"
       responses:
         200:
           description: "successful operation"
+
 definitions:
   ${className}:
     properties:
       <% for i in 1 .. col.last loop %>
       <%= col(i).COLUMN_NAME%>:
-        type: "<%= col(i).data_type%>"
-        <%if col(i).data_format is not null then %>        format: "<%= col(i).data_format%>" <% end if; %>\\n
-      <% end loop; %>
+        type: "<%= col(i).data_type %>"
+        <% if col(i).data_format is not null then %>
+        format: "<%= col(i).data_format%>"
+        <% end if; %><% end loop; %>
   ${className}List:
     properties: 
       data:
         type: "array"
         items:
           $ref: '#/definitions/${className}'
+      pagination:
+        $ref: '#/definitions/pagination'
   ${className}Object:
     properties: 
       data:
           $ref: '#/definitions/${className}'
+  pagination:
+    properties:
+      offset:
+        type: integer
+      limit:
+        type: integer
+      total:
+        type: integer
+
+parameters:
+  idParam:
+    name: <%= pk(1).column_name %>\\n
+    in: path
+    required: true
+    type: <%= pk(1).data_type %>\\n
+    description: implicit
+    pattern: '^[^/]+$'
+  payloadParam:
+    name: payload
+    in: body
+    required: true
+    schema:
+      $ref: '#/definitions/empObject'  
+  offsetParam:
+    name: offset
+    in: query
+    required: false    
+    description: The number of rows to skip before starting to collect the result set.
+    type: integer
+    format: int32    
+    minimum: 0
+    default: 0
+  limitParam:
+    name: limit
+    in: query
+    required: false    
+    description: The number of rows to return.
+    type: integer
+    format: int32    
+    default: 20
+    minimum: 10
+    maximum: 100
+  sort:
+    name: sort
+    in: query
+    type: array
+    required: false
+    description: Sorting order of rows
+    uniqueItems: true
+    minItems: 1
+    maxItems: 6
+    collectionFormat: pipes
+    items:
+      type: string
+      pattern: '([+-]\w*){1}(\|[+-]\w*){0,5}'
+      default: '+<%= pk(1).column_name %>\\n'
+
 externalDocs:
   description: "Swagger doc generated with Osalvador Code Generator"
   url: "https://apex.oracle.com/pls/apex/f?p=48301:1:33118650103837:::::"
 
-# TODD 
-# pagination
-# sorting
+# TODO
 # filtering
 # links
-# fields?
