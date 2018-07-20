@@ -4,8 +4,8 @@ AS
    g_unque_key   dbo_name_t;
 
    FUNCTION create_swagger ( p_table_name               IN VARCHAR2                                
-                             , p_unique_key               IN VARCHAR2 DEFAULT NULL
-                             , p_template                 IN VARCHAR2 DEFAULT 'swagger')
+                           , p_unique_key               IN VARCHAR2 DEFAULT NULL
+                           , p_template                 IN VARCHAR2 DEFAULT 'swagger')
       RETURN CLOB
    AS
       l_count        PLS_INTEGER := 0;
@@ -55,7 +55,7 @@ AS
       g_unque_key := upper(p_unique_key);
 
       --Process template      
-      l_swagger_code := teplsql.process (l_vars, p_template);
+      l_swagger_code := teplsql.process (l_vars, p_template, 'SWAGGERGEN');
 
       return l_swagger_code;
 

@@ -1,21 +1,6 @@
 <%@ template name=swagger %>
 <%! col  swaggerGen.column_tt := swaggerGen.get_all_columns ('${table_name}'); %>
 <%! pk   swaggerGen.column_tt := swaggerGen.get_pk_columns ('${table_name}', '${unque_key}'); %>
-<%! npk  swaggerGen.column_tt := swaggerGen.get_non_pk_columns ('${table_name}', '${unque_key}'); %>
-<%! c pls_integer; %>
-<%! procedure sep (p_cont in pls_integer, p_delimiter in varchar2)
-    as
-    begin
-         if p_cont > 1
-         then
-               teplsql.p(p_delimiter);
-         end if;
-    end; %>
-<%! function uf (p_in in varchar2) return varchar2
-    as
-    begin
-        return swaggerGen.upper_first(p_in);
-    end;%>
 swagger: '2.0'
 
 info:

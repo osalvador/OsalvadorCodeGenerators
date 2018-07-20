@@ -37,6 +37,13 @@ The Interface Implementation template: [jdbctemplate-dao-implement.teplsql](./te
 
 ![](./images/JDBCTemplateGenerator.gif)
 
+#### [Swagger YAML Generator](https://apex.oracle.com/pls/apex/f?p=48301:8:101284947539938::NO:8::)
+
+The template: [swagger.yaml.teplsql](./templates/swagger.yaml.teplsql)
+
+![](./images/SwaggerGenerator.gif)
+
+
 ## Why another code generator?
 
 I usually use this type of code generators to create models, entities or DTOs based on database tables. The problem with these code generators is that they require instrumentation (installation and configuration) and a learning curve that is sometimes greater than the time they saved. In addition these generators are used occasionally, having to re-read the documentation again.

@@ -63,5 +63,295 @@ AS
     FUNCTION upper_first (p_string VARCHAR2)
         RETURN VARCHAR2;
 
+/************************
+*  Swagger Template        *
+*************************/
+
+$if false $then
+<%@ template name=swagger %>
+<%! col  swaggerGen.column_tt := swaggerGen.get_all_columns ('${table_name}'); %>
+<%! pk   swaggerGen.column_tt := swaggerGen.get_pk_columns ('${table_name}', '${unque_key}'); %>
+swagger: '2.0'
+
+info:
+  title: REST API for ${table_name}
+  description: API for all CRUD operations of the table ${table_name}
+  version: 1.0.0
+
+host: '127.0.0.1:8080'
+basePath: /api/v1
+schemes:
+  - http
+
+produces:
+  - application/json
+
+tags:
+  - name: "${lower_table_name}"
+    description: "Table description"
+
+paths:
+  '/${lower_table_name}':
+    get:
+      tags: 
+        - ${lower_table_name}
+      summary: "Get all rows"
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/offsetParam"
+        - $ref: "#/parameters/limitParam"
+        - $ref: "#/parameters/sort"
+      responses:
+        200:
+          description: Success
+          schema:
+            $ref: "#/definitions/${className}List"
+        400:
+          $ref: '#/responses/400BadRequest'
+        404:
+          $ref: '#/responses/404NotFound'
+        500:
+          $ref: '#/responses/500InternalServerError'
+    post:
+      tags: 
+        - ${lower_table_name}
+      summary: "Add a new row"
+      produces: 
+        - application/json
+      parameters:
+        - $ref: "#/parameters/payloadParam"
+      responses:
+        201:
+          description: Success
+          schema:
+            $ref: "#/definitions/${className}Object"
+        400:
+          $ref: '#/responses/400BadRequest'
+        404:
+          $ref: '#/responses/404NotFound'
+        500:
+          $ref: '#/responses/500InternalServerError'
+
+  '/${lower_table_name}/{<%= pk(1).column_name %>}':
+    get:
+      tags: 
+        - ${lower_table_name}
+      summary: "Get a single row"
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/idParam"
+      responses:
+        200:
+          description: Success
+          schema:
+            $ref: "#/definitions/${className}Object"
+        400:
+          $ref: '#/responses/400BadRequest'
+        404:
+          $ref: '#/responses/404NotFound'
+        500:
+          $ref: '#/responses/500InternalServerError'
+    put:
+      tags: 
+        - ${lower_table_name}    
+      summary: "Updates all fields in a row"
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/idParam"
+        - $ref: "#/parameters/payloadParam"
+      responses:
+        204:
+          description: Success
+        400:
+          $ref: '#/responses/400BadRequest'
+        404:
+          $ref: '#/responses/404NotFound'
+        500:
+          $ref: '#/responses/500InternalServerError'
+    patch:
+      tags: 
+        - ${lower_table_name}
+      summary: "Partial update of a row"
+      operationId: updateItem
+      parameters:
+        - $ref: "#/parameters/idParam"
+        - $ref: "#/parameters/payloadParam"
+      responses:
+        204:
+          description: Success
+        400:
+          $ref: '#/responses/400BadRequest'
+        404:
+          $ref: '#/responses/404NotFound'
+        500:
+          $ref: '#/responses/500InternalServerError'
+    delete:
+      tags: 
+        - ${lower_table_name}
+      summary: "Delete an existin row"        
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/idParam"
+      responses:
+        204:
+          description: Success
+        400:
+          $ref: '#/responses/400BadRequest'
+        404:
+          $ref: '#/responses/404NotFound'
+        500:
+          $ref: '#/responses/500InternalServerError'
+
+definitions:
+  ${className}:
+    properties:
+      <% for i in 1 .. col.last loop %>
+      <%= col(i).COLUMN_NAME%>:
+        type: "<%= col(i).data_type %>"
+        <% if col(i).data_format is not null then %>
+        format: "<%= col(i).data_format%>"
+        <% end if; %><% end loop; %>
+  ${className}List:
+    properties: 
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/${className}'
+      pagination:
+        $ref: '#/definitions/Pagination'
+  ${className}Object:
+    properties: 
+      data:
+          $ref: '#/definitions/${className}'
+  Pagination:
+    properties:
+      offset:
+        type: integer
+      limit:
+        type: integer
+      total:
+        type: integer
+  Message:
+    type: object
+    properties:
+      message:
+        type: string
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      field:
+        type: string
+  Errors:
+    type: array
+    items:
+      $ref: '#/definitions/Error'
+  ValidationError:
+    type: object
+    properties:
+      message:
+        type: string
+      errors:
+        $ref: '#/definitions/Errors'
+
+parameters:
+  idParam:
+    name: <%= pk(1).column_name %>\\n
+    in: path
+    required: true
+    type: <%= pk(1).data_type %>\\n
+    description: implicit
+    pattern: '^[^/]+$'
+  payloadParam:
+    name: payload
+    in: body
+    required: true
+    schema:
+      $ref: '#/definitions/${className}Object'  
+  offsetParam:
+    name: offset
+    in: query
+    required: false    
+    description: The number of rows to skip before starting to collect the result set.
+    type: integer
+    format: int32    
+    minimum: 0
+    default: 0
+  limitParam:
+    name: limit
+    in: query
+    required: false    
+    description: The number of rows to return.
+    type: integer
+    format: int32    
+    default: 20
+    minimum: 10
+    maximum: 100
+  sort:
+    name: sort
+    in: query
+    type: array
+    required: false
+    description: Sorting order of rows
+    uniqueItems: true
+    minItems: 1
+    maxItems: 6
+    collectionFormat: pipes
+    items:
+      type: string
+      pattern: '([+-]\w*){1}(\|[+-]\w*){0,5}'
+      default: '+<%= pk(1).column_name %>\\n'
+
+responses:
+  SuccessMessage:
+    description: Success
+    schema:
+      $ref: '#/definitions/Message'
+  400BadRequest:
+    description: The request was invalid or cannot be otherwise served.
+    schema:
+      $ref: '#/definitions/ValidationError'
+  401Unauthorized:
+    description: Authentication credentials were missing or incorrect.
+    schema:
+      $ref: '#/definitions/Message'
+  403Forbidden:
+    description: The request is understood, but it has been refused or access is not allowed.
+    schema:
+      $ref: '#/definitions/Message'
+  404NotFound:
+    description: The URI requested is invalid or the resource requested does not exists. 
+    schema:
+      $ref: '#/definitions/Message'
+  409Conflict:
+    description: Any message which should help the user to resolve the conflict. 
+    schema:
+      $ref: '#/definitions/Message'
+  429TooManyRequests:
+    description: The request cannot be served due to the application’s rate limit having been exhausted for the resource. 
+    schema:
+      $ref: '#/definitions/Message'
+  500InternalServerError:
+    description: Something is broken.
+    schema:
+      $ref: '#/definitions/Message'
+  503ServiceUnavailable:
+    description: The server is up, but overloaded with requests. Try again later. 
+    schema:
+      $ref: '#/definitions/Message'
+
+externalDocs:
+  description: "Swagger doc generated with Osalvador Code Generator"
+  url: "https://apex.oracle.com/pls/apex/f?p=48301:1:33118650103837:::::"
+
+$end
 
 END swaggerGen;
