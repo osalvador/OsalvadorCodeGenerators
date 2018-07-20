@@ -101,6 +101,48 @@ I am also working on the generation of complete applications based on SpringBoot
 | `XMLTYPE`          | `String`
 
 
+## SQL Data Type to Swagger Mapping
+
+| SQL Data Type 	| Swagger Type    | Swagger Format | 
+| ------------------| --------------- | --------------- | 
+| `VARCHAR2`          | `string` 	  | ``
+| `CHAR`              | `string` 	  | ``
+| `CHARACTER`         | `string` 	  | ``
+| `LONG`              | `string` 	  | ``
+| `STRING`            | `string` 	  | ``
+| `VARCHAR`           | `string` 	  | ``
+| `RAW`               | `string` 	  | `byte`
+| `LONG RAW`          | `string` 	  | `byte`
+| `BINARY_INTEGER`    | `integer`	  | `int32`
+| `NATURAL`           | `integer`	  | `int32`
+| `NATURALN`          | `integer`	  | `int32`
+| `PLS_INTEGER`       | `integer`	  | `int32`
+| `POSITIVE`          | `integer`	  | `int32`
+| `POSITIVEN`         | `integer`	  | `int32`
+| `SIGNTYPE`          | `integer`	  | `int32`
+| `INT`               | `integer`	  | `int32`
+| `INTEGER`           | `integer`	  | `int32`
+| `SMALLINT`          | `integer`	  | `int32`
+| `DEC`               | `number`	  | ``
+| `DECIMAL`           | `number`	  | ``
+| `NUMBER`            | `number`	  | ``
+| `NUMERIC`           | `number`	  | ``
+| `DOUBLE PRECISION`  | `number`	  | `double`
+| `FLOAT`             | `number`	  | `float`
+| `REAL`              | `number`	  | ``
+| `DATE`              | `string`	  | `date-time`
+| `TIMESTAMP` 	 	  | `string`	  | `date-time`
+| `INTERVAL` 		  | `string`	  | `string`
+| `ROWID`             | `string`	  | ``
+| `UROWID`            | `string`	  | ``
+| `CLOB`              | `string`	  | ``
+| `BLOB`              | `string`	  | `byte`
+| `XMLTYPE`           | `string`	  | ``
+
+
+
+
+
 
 
 
