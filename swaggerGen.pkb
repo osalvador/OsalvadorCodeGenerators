@@ -47,7 +47,7 @@ AS
       --Init variables for render template
       l_vars ('date') := TO_CHAR (SYSDATE, 'DD-MON-YYYY HH24:MI');
       l_vars ('table_name') := l_table_name;
-      l_vars ('lower_table_name') := lower(l_table_name);
+      l_vars ('lower_table_name') := to_camel_case(l_table_name);
       l_vars ('className') := upper_first(to_camel_case(l_table_name));
       l_vars ('unque_key') :=  REPLACE(upper(p_unique_key), ' ', '');
 

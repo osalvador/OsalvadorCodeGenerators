@@ -1,6 +1,16 @@
 <%@ template name=swagger %>
 <%! col  swaggerGen.column_tt := swaggerGen.get_all_columns ('${table_name}'); %>
 <%! pk   swaggerGen.column_tt := swaggerGen.get_pk_columns ('${table_name}', '${unque_key}'); %>
+<%! c pls_integer; %>
+<%! procedure sep (p_cont in pls_integer, p_delimiter in varchar2)
+    as
+    begin
+         if p_cont > 1
+         then
+               teplsql.p(p_delimiter);
+         end if;
+    end;
+%>
 swagger: '2.0'
 
 info:
@@ -31,7 +41,10 @@ paths:
       parameters:
         - $ref: "#/parameters/offsetParam"
         - $ref: "#/parameters/limitParam"
-        - $ref: "#/parameters/sort"
+        - $ref: "#/parameters/sortParam"
+        <% for i in 1 .. col.last loop %>
+        - $ref: "#/parameters/<%=col(i).column_name%>FilterParam"
+        <% end loop;%>
       responses:
         200:
           description: Success
@@ -209,7 +222,7 @@ parameters:
   offsetParam:
     name: offset
     in: query
-    required: false    
+    required: false
     description: The number of rows to skip before starting to collect the result set.
     type: integer
     format: int32    
@@ -225,7 +238,7 @@ parameters:
     default: 20
     minimum: 10
     maximum: 100
-  sort:
+  sortParam:
     name: sort
     in: query
     type: array
@@ -237,8 +250,19 @@ parameters:
     collectionFormat: pipes
     items:
       type: string
-      pattern: '([+-]\w*){1}(\|[+-]\w*){0,5}'
+      pattern: '[-+](<% c := col.last+1; for i in 1 .. col.last loop %><%= col(i).COLUMN_NAME %><%sep(c-i,'|'); end loop;%>)'
       default: '+<%= pk(1).column_name %>\\n'
+
+  <% for i in 1 .. col.last loop %>
+  <%=col(i).column_name%>FilterParam:
+    name: <%=col(i).column_name%>\\n
+    in: query
+    required: false
+    description: The <%=col(i).column_name%> column value to filter results.
+    type: <%= col(i).data_type %>\\n
+    <% if col(i).data_format is not null then %>
+    format: "<%= col(i).data_format%>"
+    <% end if; end loop; %>
 
 responses:
   SuccessMessage:
